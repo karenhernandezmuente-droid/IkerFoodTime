@@ -1,0 +1,142 @@
+import React, { useMemo } from 'react';
+import { base44 } from '@/api/base44Client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { format, startOfDay, endOfDay } from 'date-fns';
+import { motion } from 'framer-motion';
+import { Cat, Sparkles } from 'lucide-react';
+
+import FeedingStatus from '@/components/FeedingStatus';
+import FeedButton from '@/components/FeedButton';
+import FeedingHistory from '@/components/FeedingHistory';
+import NotificationChecker from '@/components/NotificationChecker';
+import PullToRefresh from '@/components/PullToRefresh';
+
+export default function FeedView() {
+  const queryClient = useQueryClient();
+  const today = new Date();
+
+  const { data: schedules = [] } = useQuery({
+    queryKey: ['schedules'],
+    queryFn: () => base44.entities.ReminderSchedule.list(),
+  });
+
+  const { data: allLogs = [] } = useQuery({
+    queryKey: ['feedingLogs'],
+    queryFn: () => base44.entities.FeedingLog.list('-fed_at', 50),
+  });
+
+  const todayLogs = useMemo(() => {
+    const start = startOfDay(today);
+    const end = endOfDay(today);
+    return allLogs.filter((l) => {
+      const d = new Date(l.fed_at);
+      return d >= start && d <= end;
+    });
+  }, [allLogs, today]);
+
+  const allFedToday = schedules.length > 0 && schedules.every((s) => {
+    if (s.enabled === false) return true;
+    return todayLogs.some((l) => l.scheduled_time === s.time);
+  });
+
+  const feedMutation = useMutation({
+    mutationFn: (data) => base44.entities.FeedingLog.create(data),
+    onMutate: async (newLog) => {
+      await queryClient.cancelQueries({ queryKey: ['feedingLogs'] });
+      const previous = queryClient.getQueryData(['feedingLogs']);
+      queryClient.setQueryData(['feedingLogs'], (old = []) => [
+        { ...newLog, id: `optimistic-${Date.now()}` },
+        ...old,
+      ]);
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) queryClient.setQueryData(['feedingLogs'], context.previous);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['feedingLogs'] }),
+  });
+
+  const handleFeed = (fedBy) => {
+    const now = new Date();
+    const currentHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    let closestSchedule = null;
+    let minDiff = Infinity;
+    schedules.forEach((s) => {
+      if (s.enabled === false) return;
+      const alreadyFed = todayLogs.some((l) => l.scheduled_time === s.time);
+      if (alreadyFed) return;
+      const [sh, sm] = s.time.split(':').map(Number);
+      const [ch, cm] = currentHHMM.split(':').map(Number);
+      const diff = Math.abs((sh * 60 + sm) - (ch * 60 + cm));
+      if (diff < minDiff) { minDiff = diff; closestSchedule = s; }
+    });
+    feedMutation.mutate({
+      fed_at: now.toISOString(),
+      fed_by: fedBy,
+      scheduled_time: closestSchedule?.time || currentHHMM,
+    });
+  };
+
+  const handleRefresh = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['feedingLogs'] }),
+      queryClient.invalidateQueries({ queryKey: ['schedules'] }),
+    ]);
+
+  return (
+    <PullToRefresh onRefresh={handleRefresh}>
+      <NotificationChecker schedules={schedules} todayLogs={todayLogs} />
+      <div className="max-w-lg mx-auto px-4 py-8 space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 mb-2">
+            <Cat className="h-8 w-8 text-primary" />
+          </div>
+          <h1 className="text-3xl font-bold font-heading tracking-tight">
+            Did you feed the cat?
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            {format(today, 'EEEE, MMMM d')}
+          </p>
+          {allFedToday && schedules.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 text-accent text-sm font-medium"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              All feedings done today!
+            </motion.div>
+          )}
+        </div>
+
+        <FeedButton onFeed={handleFeed} isLoading={feedMutation.isPending} />
+
+        {schedules.filter((s) => s.enabled !== false).length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">
+              Feeding Schedule
+            </p>
+            {schedules
+              .filter((s) => s.enabled !== false)
+              .sort((a, b) => a.time.localeCompare(b.time))
+              .map((s) => (
+                <FeedingStatus
+                  key={s.id}
+                  schedule={s}
+                  todayLog={todayLogs.find((l) => l.scheduled_time === s.time)}
+                />
+              ))}
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">
+            Today's Feedings
+          </p>
+          <FeedingHistory logs={todayLogs} />
+        </div>
+      </div>
+    </PullToRefresh>
+  );
+}
