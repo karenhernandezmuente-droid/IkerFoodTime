@@ -1,187 +1,99 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#ff6b6b" />
-  <meta name="description" content="IkerFoodTime - Never forget to feed Iker! Cat feeding reminder PWA." />
-  <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="apple-touch-icon" href="icons/icon-192.png" />
-  <link rel="stylesheet" href="styles.css" />
-  <title>IkerFoodTime</title>
-</head>
-<body>
-  <main class="app-shell">
-    <!-- Hero Section with Status -->
-    <section class="hero">
-      <div class="hero-header">
-        <p class="eyebrow">🐱 Cat Care</p>
-        <h1>IkerFoodTime</h1>
-        <p class="subhead">
-          Never forget to feed Iker! Get reminders for meal times and keep track of feeding history.
-        </p>
-      </div>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
-      <!-- Action Buttons -->
-      <div class="button-row">
-        <button id="installBtn" class="primary hidden">📲 Install App</button>
-        <button id="notifyBtn" class="secondary">🔔 Enable Notifications</button>
-      </div>
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-      <!-- Status Indicator -->
-      <p id="status" class="status">Loading app status...</p>
-    </section>
+@layer base {
+  :root {
+    --background: 35 30% 97%;
+    --foreground: 25 20% 12%;
+    --card: 35 25% 99%;
+    --card-foreground: 25 20% 12%;
+    --popover: 35 25% 99%;
+    --popover-foreground: 25 20% 12%;
+    --primary: 25 70% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 35 30% 93%;
+    --secondary-foreground: 25 20% 20%;
+    --muted: 35 20% 94%;
+    --muted-foreground: 25 10% 45%;
+    --accent: 160 40% 45%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 30 20% 88%;
+    --input: 30 20% 88%;
+    --ring: 25 70% 52%;
+    --chart-1: 25 70% 52%;
+    --chart-2: 160 40% 45%;
+    --chart-3: 35 50% 65%;
+    --chart-4: 200 40% 50%;
+    --chart-5: 340 50% 55%;
+    --radius: 0.75rem;
+    --font-heading: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-display: 'Playfair Display', serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --sidebar-background: 35 25% 96%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 25 70% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 35 30% 93%;
+    --sidebar-accent-foreground: 25 20% 20%;
+    --sidebar-border: 30 20% 88%;
+    --sidebar-ring: 25 70% 52%;
+  }
 
-    <!-- Next Feeding Alert -->
-    <section class="card alert">
-      <h2>⏭️ Next Feeding</h2>
-      <div id="nextFeedingAlert" class="next-feeding-display">
-        <p>No scheduled feedings yet</p>
-      </div>
-    </section>
+  .dark {
+    --background: 25 15% 8%;
+    --foreground: 35 20% 92%;
+    --card: 25 15% 11%;
+    --card-foreground: 35 20% 92%;
+    --popover: 25 15% 11%;
+    --popover-foreground: 35 20% 92%;
+    --primary: 25 70% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 25 12% 16%;
+    --secondary-foreground: 35 20% 90%;
+    --muted: 25 10% 18%;
+    --muted-foreground: 35 10% 55%;
+    --accent: 160 40% 40%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 25 10% 20%;
+    --input: 25 10% 20%;
+    --ring: 25 70% 55%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 25 15% 10%;
+    --sidebar-foreground: 35 20% 90%;
+    --sidebar-primary: 25 70% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 25 10% 16%;
+    --sidebar-accent-foreground: 35 20% 90%;
+    --sidebar-border: 25 10% 18%;
+    --sidebar-ring: 25 70% 55%;
+  }
+}
 
-    <!-- Add Feeding Schedule -->
-    <section class="card">
-      <h2>⏰ Schedule Feeding Time</h2>
-      <form id="feedingForm">
-        <div class="form-group">
-          <label for="feedingName">Feeding name</label>
-          <input 
-            id="feedingName" 
-            type="text" 
-            placeholder="Example: Breakfast, Lunch, Dinner" 
-            value="Iker's Meal"
-            required 
-          />
-        </div>
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
 
-        <div class="form-group">
-          <label for="feedingTime">Time of day (HH:MM)</label>
-          <input id="feedingTime" type="time" required />
-        </div>
+  body {
+    @apply bg-background text-foreground font-body;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
 
-        <div class="form-group">
-          <label for="feedingNotes">Notes (optional)</label>
-          <input 
-            id="feedingNotes" 
-            type="text" 
-            placeholder="Example: Add wet food, special treat, etc." 
-          />
-        </div>
-
-        <div class="form-group checkbox-group">
-          <label for="repeatDaily" class="checkbox-container">
-            <input id="repeatDaily" type="checkbox" checked />
-            <span class="checkbox-label">Repeat daily</span>
-          </label>
-        </div>
-
-        <button type="submit" class="primary full">🍖 Add Feeding Schedule</button>
-      </form>
-    </section>
-
-    <!-- Today's Feedings -->
-    <section class="card">
-      <div class="section-header">
-        <h2>📋 Today's Feedings</h2>
-        <span id="feedingCount" class="badge">0</span>
-      </div>
-      <div id="feedingListContainer" class="list-container">
-        <ul id="feedingList" class="feeding-list"></ul>
-      </div>
-      <button id="clearBtn" class="ghost full" style="display: none;">🗑️ Clear all feedings</button>
-    </section>
-
-    <!-- Feeding History -->
-    <section class="card">
-      <div class="section-header">
-        <h2>✅ Feeding History</h2>
-        <span id="historyCount" class="badge">0</span>
-      </div>
-      <div id="historyContainer" class="list-container">
-        <ul id="historyList" class="history-list"></ul>
-      </div>
-      <button id="clearHistoryBtn" class="ghost full" style="display: none;">🗑️ Clear history</button>
-    </section>
-
-    <!-- Iker's Stats -->
-    <section class="card stats">
-      <h2>📊 Iker's Stats</h2>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <p class="stat-label">Today's Feedings</p>
-          <p class="stat-value" id="todayCount">0</p>
-        </div>
-        <div class="stat-card">
-          <p class="stat-label">This Week</p>
-          <p class="stat-value" id="weekCount">0</p>
-        </div>
-        <div class="stat-card">
-          <p class="stat-label">Last Fed</p>
-          <p class="stat-value" id="lastFedTime">--:--</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Quick Actions -->
-    <section class="card">
-      <h2>⚡ Quick Actions</h2>
-      <div class="button-grid">
-        <button id="quickFeedBtn" class="secondary full">🎯 Quick Feed Now</button>
-        <button id="settingsBtn" class="ghost full">⚙️ Settings</button>
-      </div>
-    </section>
-
-    <!-- How to Use -->
-    <section class="card small">
-      <h2>💡 How to use</h2>
-      <ol class="instructions">
-        <li>Install the app to your home screen</li>
-        <li>Enable notifications so you don't miss feeding time</li>
-        <li>Set up feeding schedules for Iker's meals</li>
-        <li>Get reminders at scheduled times</li>
-        <li>Track feeding history automatically</li>
-      </ol>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-      <p>Made with ❤️ for Iker 🐱</p>
-      <p class="version">v1.1.0</p>
-    </footer>
-  </main>
-
-  <!-- Settings Modal (hidden by default) -->
-  <dialog id="settingsModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Settings</h2>
-        <button id="closeSettingsBtn" class="close-btn">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="setting-item">
-          <label for="notificationSound">
-            <input id="notificationSound" type="checkbox" checked />
-            <span>Sound notifications</span>
-          </label>
-        </div>
-        <div class="setting-item">
-          <label for="darkMode">
-            <input id="darkMode" type="checkbox" />
-            <span>Dark mode</span>
-          </label>
-        </div>
-        <div class="setting-item">
-          <label for="remindMinutes">Remind me (minutes before)</label>
-          <input id="remindMinutes" type="number" min="0" max="120" value="15" />
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button id="closeSettingsBtn2" class="primary full">Close</button>
-      </div>
-    </div>
-  </dialog>
-
-  <script src="app.js" type="module"></script>
-</body>
-</html>
+  button, a, [role="button"] {
+    @apply select-none;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
