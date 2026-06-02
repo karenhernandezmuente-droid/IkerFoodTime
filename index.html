@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#ff6b6b" />
+  <meta name="description" content="IkerFoodTime - Never forget to feed Iker! Cat feeding reminder PWA." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>IkerFoodTime</title>
+</head>
+<body>
+  <main class="app-shell">
+    <section class="hero">
+      <p class="eyebrow">🐱 Cat Care</p>
+      <h1>IkerFoodTime</h1>
+      <p class="subhead">
+        Never forget to feed Iker! Get reminders for meal times and keep track of feeding history.
+      </p>
+
+      <div class="button-row">
+        <button id="installBtn" class="primary hidden">📲 Install App</button>
+        <button id="notifyBtn" class="secondary">🔔 Enable Notifications</button>
+      </div>
+
+      <p id="status" class="status">Loading app status...</p>
+    </section>
+
+    <section class="card">
+      <h2>⏰ Schedule Feeding Time</h2>
+      <label>
+        Feeding name
+        <input id="feedingName" type="text" placeholder="Example: Breakfast, Lunch, Dinner" value="Iker's Meal" />
+      </label>
+
+      <label>
+        Time of day (HH:MM)
+        <input id="feedingTime" type="time" />
+      </label>
+
+      <label>
+        Repeat daily?
+        <div class="checkbox-row">
+          <input id="repeatDaily" type="checkbox" checked />
+          <label for="repeatDaily" class="checkbox-label">Yes, remind me every day</label>
+        </div>
+      </label>
+
+      <button id="scheduleBtn" class="primary full">🍖 Add Feeding Schedule</button>
+    </section>
+
+    <section class="card">
+      <h2>📋 Today's Feedings</h2>
+      <ul id="feedingList"></ul>
+      <button id="clearBtn" class="ghost full">Clear all feedings</button>
+    </section>
+
+    <section class="card">
+      <h2>✅ Feeding History</h2>
+      <ul id="historyList"></ul>
+      <button id="clearHistoryBtn" class="ghost full">Clear history</button>
+    </section>
+
+    <section class="card small">
+      <h2>💡 How to use</h2>
+      <p>1. Install the app to your home screen</p>
+      <p>2. Enable notifications so you don't miss feeding time</p>
+      <p>3. Set up feeding schedules for Iker's meals</p>
+      <p>4. Get reminders at scheduled times</p>
+    </section>
+  </main>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
